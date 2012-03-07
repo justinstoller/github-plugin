@@ -315,6 +315,10 @@ public class GitHubWebHook implements UnprotectedRootAction {
      */
 
 
+    private String repoUrl;
+    private String repoName;
+    private String ownerName;
+
     /**
      * 1 push to 2 branches will result in 2 pushes.
      */
@@ -330,7 +334,7 @@ public class GitHubWebHook implements UnprotectedRootAction {
        * <GitHubRepositoryName> name??
        */
         JSONObject o = JSONObject.fromObject(req.getParameter("payload"));
-        if o.has("pull_request") {
+        if (o.has("pull_request")) {
             JSONObject pullRequest = o.getJSONObject("pull_request");
             /**
              * Get the base and head information for the pull request
@@ -354,11 +358,17 @@ public class GitHubWebHook implements UnprotectedRootAction {
             String baseSshUrl      = baseRepo.getString("ssh_url");
             String baseLabel       = base.getString("label");
             String baseSHA         = base.getString("sha");
+
+            // This will make the compiler happy for now...
+            JSONObject repository = o.getJSONObject("repository");
+            repoUrl = repository.getString("url"); // something like 'https://github.com/kohsuke/foo'
+            repoName = repository.getString("name"); // 'foo' portion of the above URL
+            ownerName = repository.getJSONObject("owner").getString("name"); // 'kohsuke' portion of the above URL
         } else {
             JSONObject repository = o.getJSONObject("repository");
-            String repoUrl = repository.getString("url"); // something like 'https://github.com/kohsuke/foo'
-            String repoName = repository.getString("name"); // 'foo' portion of the above URL
-            String ownerName = repository.getJSONObject("owner").getString("name"); // 'kohsuke' portion of the above URL
+            repoUrl = repository.getString("url"); // something like 'https://github.com/kohsuke/foo'
+            repoName = repository.getString("name"); // 'foo' portion of the above URL
+            ownerName = repository.getJSONObject("owner").getString("name"); // 'kohsuke' portion of the above URL
         }
 
 
